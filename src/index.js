@@ -3,8 +3,9 @@ class Validator {
       const {
         type = null, required = false, minLength = null, contains = null,
         positive = false, min = null, max = null, range = false,
+        sizeof = null,
         } = self.options || {};
-      this.options = { type, required, minLength, contains, positive, min, max, range, };
+      this.options = { type, required, minLength, contains, positive, min, max, range, sizeof, };
     }
   
     string() {
@@ -17,6 +18,11 @@ class Validator {
       return new Validator(this);
       }
 
+    array() {
+      this.options.type = 'array';
+      return new Validator(this);
+    }
+    
     required() {
       this.options.required = true;
       return new Validator(this);
@@ -44,6 +50,11 @@ class Validator {
       return new Validator(this);
       }
 
+    sizeof(value) {
+      this.options.sizeof = value;
+      return new Validator(this);
+    }
+    
     isValid(value) {
       if (this.options.required) {
         if (value === null || value === undefined || value === '') {
@@ -81,6 +92,17 @@ class Validator {
             return false;
           }
           if (value < this.options.min) {
+            return false;
+          }
+        }
+      }
+
+      if (this.options.type === 'array') {
+        if (!Array.isArray(value) && value !== null) {
+          return false;
+        }
+        if (this.options.sizeof) {
+          if (value === null || value.length < this.options.sizeof) {
             return false;
           }
         }
