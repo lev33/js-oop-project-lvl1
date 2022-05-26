@@ -4,11 +4,11 @@ class Validator {
       type = null, required = false, minLength = null, contains = null,
       positive = false, min = null, max = null, range = false,
       size = null,
-      shape = {},
+      obj = {},
       validators = [], test = {},
     } = self.options || {};
     this.options = {
-      type, required, minLength, contains, positive, min, max, range, size, shape, validators, test
+      type, required, minLength, contains, positive, min, max, range, size, obj, validators, test,
     };
   }
 
@@ -65,7 +65,7 @@ class Validator {
   }
 
   shape(obj) {
-    this.options.shape = obj;
+    this.options.obj = obj;
     return new Validator(this);
   }
 
@@ -133,14 +133,16 @@ class Validator {
     }
 
     if (this.options.type === 'object') {
-      const keys = Object.keys(this.options.shape);
-      return keys.every((key) => this.options.shape[key].isValid(value[key]));
+      const keys = Object.keys(this.options.obj);
+      return keys.every((key) => this.options.obj[key].isValid(value[key]));
     }
 
     const typeValidators = this.options.validators.filter((el) => el.type === this.options.type);
     return typeValidators.every(({ name, fn }) => {
-      return Object.keys(this.options.test).includes(name) ?
-        fn(value, this.options.test[name]) : true;
+      if (Object.keys(this.options.test).includes(name)) {
+        return fn(value, this.options.test[name]);
+      }
+      return true;
     });
   }
 }
